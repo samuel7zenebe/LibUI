@@ -1,112 +1,206 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { API_URL } from "../config";
-import { type UserType } from "../types";
-import { ConfirmDialog } from "../components/ConfirmDialog";
-import { Dialog } from "../components/dialog";
-import { SignUp } from "../components/SignUp";
 
 export const Route = createFileRoute("/")({
-  component: RouteComponent,
+  component: Home,
 });
 
-function RouteComponent() {
-  const [data, setData] = useState<{
-    users: UserType[];
-  }>();
-  const [openConfirm, setOpenConfirm] = useState(false);
-
-  useEffect(() => {
-    async function fetchData() {
-      const res = await fetch(`${API_URL}/auth/users`).then((res) =>
-        res.json()
-      );
-      console.log(res);
-      setData(res);
-    }
-    fetchData();
-  }, []);
+function Home() {
   return (
-    <div
-      className="dark bg-background text-foreground min-h-screen w-full "
-      style={{ padding: "1rem" }}
-    >
-      <SignUp />
-
-      <h1 className=" text-red-500 font-bold"> Data Should be like this : </h1>
-      <ConfirmDialog
-        open={openConfirm}
-        title="Confirm Action"
-        onConfirm={() => {
-          setOpenConfirm(false);
-        }}
-        onCancel={() => {
-          setOpenConfirm(false);
-        }}
-      />
-
-      <button
-        onClick={() => {
-          setOpenConfirm(true);
-        }}
-      >
-        Open Dialog
-      </button>
-
-      <Dialog
-        open={openConfirm}
-        onClose={() => {
-          setOpenConfirm(false);
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          <h2 style={{ margin: 0, fontSize: "1.5rem", textAlign: "left" }}>
-            Confirm Action
-          </h2>
-          <p style={{ margin: 0, color: "#666", textAlign: "left" }}>
-            Are you sure you want to proceed with this action? This cannot be
-            undone.
+    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+            Library Management System
+          </h1>
+          <p className="max-w-2xl mx-auto text-xl text-gray-500 dark:text-gray-400">
+            libray Management front end Ui made with the following latest
+            technologies.
           </p>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "0.5rem",
-              marginTop: "1rem",
-            }}
-          >
-            <button
-              onClick={() => setOpenConfirm(false)}
-              style={{
-                background: "transparent",
-                color: "inherit",
-                border: "1px solid #ccc",
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => setOpenConfirm(false)}
-              style={{
-                background: "#646cff",
-                color: "white",
-                border: "none",
-              }}
-            >
-              Confirm
-            </button>
-          </div>
         </div>
-      </Dialog>
-      {data?.users.map((user) => (
-        <div
-          onClick={() => {
-            setOpenConfirm(true);
-          }}
+
+        {/* Tech Stack Grid */}
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {/* React Card */}
+          <TechCard
+            name="React 19"
+            description="The library for web and native user interfaces. Leveraging the latest features for optimal performance."
+            icon={
+              <svg
+                viewBox="-10.5 -9.45 21 18.9"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-12 h-12 text-[#149ECA]"
+              >
+                <circle cx="0" cy="0" r="2" fill="currentColor"></circle>
+                <g stroke="currentColor" strokeWidth="1" fill="none">
+                  <ellipse rx="10" ry="4.5"></ellipse>
+                  <ellipse rx="10" ry="4.5" transform="rotate(60)"></ellipse>
+                  <ellipse rx="10" ry="4.5" transform="rotate(120)"></ellipse>
+                </g>
+              </svg>
+            }
+          />
+
+          {/* Vite Card */}
+          <TechCard
+            name="Vite"
+            description="Next Generation Frontend Tooling. Instant server start and lightning-fast HMR."
+            icon={
+              <svg
+                viewBox="0 0 32 32"
+                className="w-12 h-12"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M30.6 3.8a1.3 1.3 0 00-1.2-.5l-7.6 1.3L16.6.3a1.3 1.3 0 00-2.3.3L1.4 27.6a1.3 1.3 0 001.8 1.6l27.4-13.8a1.3 1.3 0 000-2.3l-9.5-5.4 9.5-3.9z"
+                  fill="#ffc61e"
+                />
+                <path d="M20.5 10.3l-9.5 5.4 1.3-2.8 8.2-2.6z" fill="#fff" />
+                <path
+                  d="M20.5 10.3l-8.2 2.6-1.3 2.8-9.6 13.5L20.5 10.3z"
+                  fill="#bd34fe"
+                />
+                <path
+                  d="M16.6.3l5.2 4.3-1.3 5.7-9.5 5.4L16.6.3z"
+                  fill="#41d1ff"
+                />
+              </svg>
+            }
+          />
+
+          {/* Tailwind CSS Card */}
+          <TechCard
+            name="Tailwind CSS 4"
+            description="A utility-first CSS framework for rapidly building custom designs without leaving your HTML."
+            icon={
+              <svg
+                viewBox="0 0 54 33"
+                className="w-12 h-12 text-[#38bdf8]"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M27 0c-7.2 0-11.7 3.6-13.5 10.8 2.7-3.6 5.85-4.95 9.45-4.05 2.054.513 3.522 2.004 5.147 3.653C30.744 13.09 33.808 16.2 40.5 16.2c7.2 0 11.7-3.6 13.5-10.8-2.7 3.6-5.85 4.95-9.45 4.05-2.054-.513-3.522-2.004-5.147-3.653C36.756 3.11 33.692 0 27 0zM13.5 16.2C6.3 16.2 1.8 19.8 0 27c2.7-3.6 5.85-4.95 9.45-4.05 2.054.513 3.522 2.004 5.147 3.653C17.244 29.29 20.308 32.4 27 32.4c7.2 0 11.7-3.6 13.5-10.8-2.7 3.6-5.85 4.95-9.45 4.05-2.054-.513-3.522-2.004-5.147-3.653C23.256 19.31 20.192 16.2 13.5 16.2z"
+                />
+              </svg>
+            }
+          />
+
+          {/* TanStack Router Card */}
+          <TechCard
+            name="TanStack Router"
+            description="Type-safe routing for React applications. Powerful, flexible, and built for the modern web."
+            icon={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 100 100"
+                className="w-12 h-12"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  className="text-gray-300 dark:text-gray-700"
+                  stroke="currentColor"
+                />
+                <path d="M50 25 L50 50 L70 70" className="text-red-500" />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="5"
+                  className="text-red-500"
+                  fill="currentColor"
+                  stroke="none"
+                />
+              </svg>
+            }
+          />
+
+          {/* TypeScript Card */}
+          <TechCard
+            name="TypeScript"
+            description="JavaScript with syntax for types. Adds safety and enhances the developer experience."
+            icon={
+              <svg
+                viewBox="0 0 128 128"
+                className="w-12 h-12"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path fill="#007ACC" d="M0 0h128v128H0z" />
+                <path
+                  fill="#FFF"
+                  d="M71.4 99.6c-1.4 0-2.9-.1-4.3-.4-10.4-2.1-13.9-11.8-13.9-11.8l10.8-6.6s1.6 4.3 5.3 5.9c2.4 1 5.4.3 5.4-2.7 0-2.1-2.2-3.2-5.4-4.5-7.8-3.1-12.9-7.4-12.9-15.6 0-10.5 8.9-16.7 19.7-16.7 8.1 0 14.5 2.5 14.5 2.5l-5.6 9.5s-4.5-2.6-9.2-2.6c-2.9 0-5.1 1.2-5.1 3.2 0 1.9 2.4 2.8 6.4 4.5 8.2 3.4 12.6 8.2 12.6 16.1 0 11.2-9.6 19.2-18.3 19.2zm-42.3-.2c-12.4 0-19.1-6.1-19.1-6.1l5.9-9.3s5.1 3.6 10.9 3.6c3.9 0 5.6-1.9 5.6-4.4v-35h11.9v35.7c0 11.5-7.1 15.5-15.2 15.5z"
+                />
+              </svg>
+            }
+          />
+        </div>
+
+        {/* Footer Note */}
+        <div className="mt-16 text-center border-t border-gray-200 dark:border-gray-800 pt-8">
+          <p className="text-base text-gray-400">
+            Built with ❤️ by Samuel Zenebe
+            <br />
+            <a
+              href="https://github.com/samuel7zenebe"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GitHub
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TechCard({
+  name,
+  description,
+  icon,
+}: {
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="relative group bg-white dark:bg-gray-900 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-800">
+      <div className="flex items-center justify-center w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-xl mb-6 group-hover:scale-110 transition-transform duration-300">
+        {icon}
+      </div>
+      <div className="mt-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <span className="absolute inset-0 rounded-2xl" />
+          {name}
+        </h3>
+        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+          {description}
+        </p>
+      </div>
+      <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <svg
+          className="w-5 h-5 text-indigo-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
         >
-          {user.email}
-        </div>
-      ))}
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M17 8l4 4m0 0l-4 4m4-4H3"
+          />
+        </svg>
+      </div>
     </div>
   );
 }
