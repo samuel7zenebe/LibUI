@@ -1,19 +1,173 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useAuth } from "../contexts/auth-context";
+import { Sidebar } from "../components/Sidebar";
+import { TopNav } from "../components/TopNav";
+import { API_URL } from "../config";
+import type { Book, Member, BorrowRecord } from "../types";
 
 export const Route = createFileRoute("/")({
   component: Home,
+  loader: async (): Promise<{
+    books: Book[];
+    members: Member[];
+    borrowRecords: BorrowRecord[];
+  }> => {
+    const token = localStorage.getItem("token");
+    if (!token) return { books: [], members: [], borrowRecords: [] };
+
+    try {
+      const [booksRes, membersRes, borrowRecordsRes] = await Promise.all([
+        fetch(`${API_URL}/books`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${API_URL}/members`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${API_URL}/borrow-records`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      const books = booksRes.ok ? await booksRes.json() : [];
+      const members = membersRes.ok ? await membersRes.json() : [];
+      const borrowRecords = borrowRecordsRes.ok
+        ? await borrowRecordsRes.json()
+        : [];
+
+      return { books, members, borrowRecords };
+    } catch (error) {
+      console.error("Failed to fetch dashboard data", error);
+      return { books: [], members: [], borrowRecords: [] };
+    }
+  },
+  pendingComponent: () => (
+    <div className="flex items-center justify-center h-screen bg-background">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+    </div>
+  ),
 });
 
 function Home() {
+  const { isAuthenticated } = useAuth();
+  const { books, members, borrowRecords } = Route.useLoaderData();
+
+  if (isAuthenticated) {
+    const overdueBooks = borrowRecords.filter(
+      (record: BorrowRecord) => record.status === "overdue"
+    ).length;
+
+    return (
+      <div className="flex h-screen bg-background overflow-hidden">
+        <Sidebar />
+        <div className="flex flex-col flex-1 w-full">
+          <TopNav />
+          <main className="flex-1 overflow-y-auto p-6">
+            <h1 className="text-2xl font-bold mb-6 text-foreground">
+              Dashboard
+            </h1>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                  Total Books
+                </h3>
+                <p className="text-3xl font-bold text-primary">
+                  {books.length}
+                </p>
+              </div>
+              <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                  Active Members
+                </h3>
+                <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                  {members.length}
+                </p>
+              </div>
+              <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                  Overdue Books
+                </h3>
+                <p className="text-3xl font-bold text-destructive">
+                  {overdueBooks}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-card p-6 rounded-xl shadow-sm border border-border h-96 overflow-y-auto">
+                <h3 className="text-lg font-semibold mb-4 text-foreground">
+                  Recent Activity
+                </h3>
+                <div className="space-y-4">
+                  {borrowRecords.length > 0 ? (
+                    borrowRecords.slice(0, 10).map((record: BorrowRecord) => (
+                      <div
+                        key={record.id}
+                        className="flex items-center gap-4 p-3 hover:bg-muted/50 rounded-lg transition-colors"
+                      >
+                        <div className="w-2 h-2 rounded-full bg-primary"></div>
+                        <p className="text-sm text-foreground">
+                          {record.member?.name || "Member"} {record.status}{" "}
+                          {record.book?.title || "Book"}
+                        </p>
+                        <span className="ml-auto text-xs text-muted-foreground">
+                          {new Date(record.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No recent activity
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-card p-6 rounded-xl shadow-sm border border-border h-96">
+                <h3 className="text-lg font-semibold mb-4 text-foreground">
+                  Quick Actions
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <button className="p-4 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium">
+                    Add Book
+                  </button>
+                  <button className="p-4 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 transition-colors font-medium">
+                    Register Member
+                  </button>
+                  <button className="p-4 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 transition-colors font-medium">
+                    Issue Book
+                  </button>
+                  <button className="p-4 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 transition-colors font-medium">
+                    Return Book
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Extra content to force scroll */}
+            <div className="mt-8 bg-card p-6 rounded-xl shadow-sm border border-border">
+              <h3 className="text-lg font-semibold mb-4 text-foreground">
+                System Status
+              </h3>
+              <p className="text-muted-foreground">
+                System is running smoothly. Last backup was performed at 03:00
+                AM.
+              </p>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background text-foreground py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl bg-linear-to-r from-orange-500 to-red-600 bg-clip-text text-transparent mb-4">
             Library Management System
           </h1>
-          <p className="max-w-2xl mx-auto text-xl text-gray-500 dark:text-gray-400">
+          <p className="max-w-2xl mx-auto text-xl text-muted-foreground">
             libray Management front end Ui made with the following latest
             technologies.
           </p>
@@ -173,22 +327,22 @@ function TechCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="relative group bg-white dark:bg-gray-900 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-800">
-      <div className="flex items-center justify-center w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-xl mb-6 group-hover:scale-110 transition-transform duration-300">
+    <div className="relative group bg-card p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-primary rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-border">
+      <div className="flex items-center justify-center w-16 h-16 bg-muted rounded-xl mb-6 group-hover:scale-110 transition-transform duration-300">
         {icon}
       </div>
       <div className="mt-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="text-lg font-semibold text-foreground">
           <span className="absolute inset-0 rounded-2xl" />
           {name}
         </h3>
-        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
           {description}
         </p>
       </div>
       <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <svg
-          className="w-5 h-5 text-indigo-500"
+          className="w-5 h-5 text-primary"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

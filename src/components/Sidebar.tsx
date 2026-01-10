@@ -1,0 +1,63 @@
+import { Link } from "@tanstack/react-router";
+
+export function Sidebar() {
+  return (
+    <aside className="w-64 bg-sidebar text-sidebar-foreground min-h-screen shrink-0 hidden md:block border-r border-sidebar-border">
+      <div className="p-6">
+        <h2 className="text-2xl font-bold text-primary">Library</h2>
+      </div>
+      <nav className="mt-6">
+        <ul className="space-y-2 px-4">
+          <li>
+            <Link
+              to="/"
+              className="block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              activeProps={{
+                className:
+                  "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
+              }}
+            >
+              Dashboard
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/books"
+              className="block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              activeProps={{
+                className:
+                  "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
+              }}
+            >
+              Books
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/members"
+              className="block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              activeProps={{
+                className:
+                  "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
+              }}
+            >
+              Members
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/settings"
+              className="block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              activeProps={{
+                className:
+                  "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
+              }}
+            >
+              Settings
+            </Link>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+  );
+}

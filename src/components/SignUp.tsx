@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { API_URL } from "../config";
 import { useAuth } from "../contexts/auth-context";
+import { Link, useNavigate } from "@tanstack/react-router";
 
 export function SignUp() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -13,7 +15,7 @@ export function SignUp() {
     "idle" | "loading" | "success" | "error"
   >("idle");
   const [error, setError] = useState("");
-  const { login, isAuthenticated } = useAuth();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,9 +36,9 @@ export function SignUp() {
       const data: {
         access_token: string;
         user: {
-          id: 0;
+          id: number;
           username: string;
-          role: "string";
+          role: string;
         };
       } = await res.json();
       login(
@@ -48,34 +50,35 @@ export function SignUp() {
         data.access_token
       );
       setStatus("success");
+      setTimeout(() => {
+        navigate({ to: "/" });
+      }, 1000);
     } catch (err) {
       setStatus("error");
       setError(err instanceof Error ? err.message : "Something went wrong");
     }
   };
 
-  if (isAuthenticated) {
-    return <h1> Authorized ..... </h1>;
-  }
-
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900 dark:text-white">
-          Sign up for an account
-        </h2>
-      </div>
-
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label
-              htmlFor="username"
-              className="block text-sm/6 font-medium text-gray-900 dark:text-white"
-            >
-              Username
-            </label>
-            <div className="mt-2">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="max-w-md w-full space-y-8 bg-card p-8 rounded-2xl shadow-xl border border-border">
+        <div className="text-center">
+          <h2 className="mt-6 text-3xl font-extrabold text-foreground">
+            Create Account
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Join our library management system
+          </p>
+        </div>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-foreground"
+              >
+                Username
+              </label>
               <input
                 id="username"
                 name="username"
@@ -85,19 +88,17 @@ export function SignUp() {
                 onChange={(e) =>
                   setFormData({ ...formData, username: e.target.value })
                 }
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10"
+                className="mt-1 block w-full px-4 py-3 bg-muted/50 border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                placeholder="johndoe"
               />
             </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm/6 font-medium text-gray-900 dark:text-white"
-            >
-              Email address
-            </label>
-            <div className="mt-2">
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-foreground"
+              >
+                Email address
+              </label>
               <input
                 id="email"
                 name="email"
@@ -108,32 +109,29 @@ export function SignUp() {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10"
+                className="mt-1 block w-full px-4 py-3 bg-muted/50 border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                placeholder="you@example.com"
               />
             </div>
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between">
+            <div>
               <label
                 htmlFor="password"
-                className="block text-sm/6 font-medium text-gray-900 dark:text-white"
+                className="block text-sm font-medium text-foreground"
               >
                 Password
               </label>
-            </div>
-            <div className="mt-2">
               <input
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 required
                 value={formData.password}
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10"
+                className="mt-1 block w-full px-4 py-3 bg-muted/50 border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                placeholder="••••••••"
               />
             </div>
           </div>
@@ -142,19 +140,42 @@ export function SignUp() {
             <button
               type="submit"
               disabled={status === "loading"}
-              className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {status === "loading" ? "Signing up..." : "Sign up"}
+              {status === "loading" ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
+                  Creating account...
+                </span>
+              ) : (
+                "Sign up"
+              )}
             </button>
           </div>
+
           {status === "error" && (
-            <p className="text-red-500 text-sm text-center">{error}</p>
+            <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm text-center">
+              {error}
+            </div>
           )}
+
           {status === "success" && (
-            <p className="text-green-500 text-sm text-center">
-              Sign up successful!
-            </p>
+            <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-sm text-center">
+              Account created! Redirecting...
+            </div>
           )}
+
+          <div className="text-center mt-4">
+            <p className="text-sm text-muted-foreground">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
         </form>
       </div>
     </div>
