@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Sidebar } from "../components/Sidebar";
 import { TopNav } from "../components/TopNav";
 import { useAuth } from "../contexts/auth-context";
@@ -6,7 +6,7 @@ import { API_URL } from "../config";
 import type { Genre } from "../types";
 import { useMemo, useState } from "react";
 import { Dialog } from "../components/dialog";
-import { Edit2, Trash2, Loader2 } from "lucide-react";
+import { Edit2, Trash2, Loader2, TriangleAlert, ArrowLeft } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
 import { useToast } from "../contexts/toast-context";
 
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/genres")({
 });
 
 function GenresPage() {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const { genres } = Route.useLoaderData();
     const router = useRouter();
     const { showToast } = useToast();
@@ -43,13 +43,24 @@ function GenresPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
 
+
     const filteredGenres = useMemo(() => {
         const q = searchQuery.toLowerCase().trim();
         return genreList.filter((g: Genre) => g.name.toLowerCase().includes(q));
     }, [genreList, searchQuery]);
 
     if (!isAuthenticated) return <div>Please login to view this page.</div>;
-
+    if (user?.role === "librarian") return <div className="w-full mx-auto pt-40 flex flex-col items-center justify-center">
+        <TriangleAlert className="w-20 h-20 text-red-500 font-medium" />
+        <h1 className="text-red-500 font-medium"> This is page is for admins only, you are not authorized to view this page.</h1>
+        <h1 className="text-red-500 font-medium"> SORRY !</h1>
+        <Link to="/">
+            <div className="flex items-center gap-2 mt-4">
+                <ArrowLeft className="w-5 h-5" />
+                <span>Go Back to Home</span>
+            </div>
+        </Link>
+    </div>
     const handleAddGenre = async () => {
         setLoading(true);
         try {

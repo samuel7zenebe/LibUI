@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Sidebar } from "../components/Sidebar";
 import { TopNav } from "../components/TopNav";
 import { useAuth } from "../contexts/auth-context";
@@ -6,7 +6,7 @@ import { API_URL } from "../config";
 import type { Staff } from "../types";
 import { useMemo, useState } from "react";
 import { Dialog } from "../components/dialog";
-import { Eye, Edit2, Trash2, Search, Loader2 } from "lucide-react";
+import { Eye, Edit2, Trash2, Search, Loader2, TriangleAlert, ArrowLeft } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
 import { useToast } from "../contexts/toast-context";
 
@@ -59,7 +59,18 @@ function StaffPage() {
     }, [staffList, searchQuery]);
 
     if (!isAuthenticated) return <div className="w-full text-xl text-center text-destructive">Please login to view this page.</div>;
-    if (user?.role === "librarian") return <div className="w-full text-xl text-center text-destructive">You do not have permission to view this page.</div>
+    if (user?.role === "librarian") return <div className="w-full mx-auto pt-40 flex flex-col items-center justify-center">
+        <TriangleAlert className="w-20 h-20 text-red-500 font-medium" />
+        <h1 className="text-red-500 font-medium"> This is page is for admins only, you are not authorized to view this page.</h1>
+        <h1 className="text-red-500 font-medium"> SORRY !</h1>
+        <Link to="/">
+            <div className="flex items-center gap-2 mt-4">
+                <ArrowLeft className="w-5 h-5" />
+                <span>Go Back to Home</span>
+            </div>
+        </Link>
+    </div>
+
     const handleAddStaff = async () => {
         setLoading(true);
         try {

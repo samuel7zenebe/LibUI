@@ -46,9 +46,12 @@ export function TopNav() {
                 {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
               </button>
               <span className="text-sm text-muted-foreground">
-                Welcome,{" "}
+                Welcome  {" "}
                 <span className="font-semibold text-foreground">
                   {user?.username}
+                </span>,
+                <span className="font-semibold text-foreground text-primary">
+                  {user?.role}
                 </span>
               </span>
               <button

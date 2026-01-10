@@ -1,9 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Sidebar } from "../components/Sidebar";
 import { TopNav } from "../components/TopNav";
 import { useAuth } from "../contexts/auth-context";
 import { API_URL } from "../config";
-import { BarChart3, AlertTriangle, TrendingUp } from "lucide-react";
+import { BarChart3, AlertTriangle, TrendingUp, TriangleAlert, ArrowLeft } from "lucide-react";
 import { type BorrowRecord } from "../types";
 import { differenceInDays } from "date-fns";
 
@@ -58,11 +58,21 @@ export const Route = createFileRoute("/reports")({
 });
 
 function ReportsPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { summary, popularGenres, overdueBooks } = Route.useLoaderData();
 
   if (!isAuthenticated) return <div>Please login to view this page.</div>;
-
+  if (user?.role === "librarian") return <div className="w-full mx-auto pt-40 flex flex-col items-center justify-center">
+    <TriangleAlert className="w-20 h-20 text-red-500 font-medium" />
+    <h1 className="text-red-500 font-medium"> This is page is for admins only, you are not authorized to view this page.</h1>
+    <h1 className="text-red-500 font-medium"> SORRY !</h1>
+    <Link to="/">
+      <div className="flex items-center gap-2 mt-4">
+        <ArrowLeft className="w-5 h-5" />
+        <span>Go Back to Home</span>
+      </div>
+    </Link>
+  </div>
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <Sidebar />
