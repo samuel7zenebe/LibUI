@@ -34,6 +34,18 @@ export function Sidebar() {
           </li>
           <li>
             <Link
+              to="/borrow-return"
+              className="block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              activeProps={{
+                className:
+                  "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
+              }}
+            >
+              Borrow/Return
+            </Link>
+          </li>
+          <li>
+            <Link
               to="/members"
               className="block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               activeProps={{
@@ -46,14 +58,38 @@ export function Sidebar() {
           </li>
           <li>
             <Link
-              to="/settings"
+              to="/staff"
               className="block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               activeProps={{
                 className:
                   "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
               }}
             >
-              Settings
+              Staff
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/reports"
+              className="block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              activeProps={{
+                className:
+                  "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
+              }}
+            >
+              Reports
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/genres"
+              className="block py-2.5 px-4 rounded-lg transition duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              activeProps={{
+                className:
+                  "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
+              }}
+            >
+              Genres
             </Link>
           </li>
         </ul>

@@ -40,12 +40,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("token", token);
+
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+
   };
 
   return (
@@ -63,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

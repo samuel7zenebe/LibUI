@@ -1,8 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "../contexts/auth-context";
 import { Sidebar } from "../components/Sidebar";
 import { TopNav } from "../components/TopNav";
 import { API_URL } from "../config";
+
+
 import type { Book, Member, BorrowRecord } from "../types";
 
 export const Route = createFileRoute("/")({
@@ -53,7 +55,7 @@ function Home() {
 
   if (isAuthenticated) {
     const overdueBooks = borrowRecords.filter(
-      (record: BorrowRecord) => record.status === "overdue"
+      (record: BorrowRecord) => !record.return_date && new Date(record.due_date) < new Date()
     ).length;
 
     return (
@@ -66,7 +68,7 @@ function Home() {
               Dashboard
             </h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">
                   Total Books
@@ -85,6 +87,14 @@ function Home() {
               </div>
               <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                  Active Borrows
+                </h3>
+                <p className="text-3xl font-bold text-primary">
+                  {borrowRecords.filter((record: BorrowRecord) => !record.return_date).length}
+                </p>
+              </div>
+              <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">
                   Overdue Books
                 </h3>
                 <p className="text-3xl font-bold text-destructive">
@@ -92,7 +102,6 @@ function Home() {
                 </p>
               </div>
             </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="bg-card p-6 rounded-xl shadow-sm border border-border h-96 overflow-y-auto">
                 <h3 className="text-lg font-semibold mb-4 text-foreground">
@@ -107,11 +116,11 @@ function Home() {
                       >
                         <div className="w-2 h-2 rounded-full bg-primary"></div>
                         <p className="text-sm text-foreground">
-                          {record.member?.name || "Member"} {record.status}{" "}
+                          {record.member?.name || "Member"} {record.return_date ? 'returned' : 'borrowed'}{" "}
                           {record.book?.title || "Book"}
                         </p>
                         <span className="ml-auto text-xs text-muted-foreground">
-                          {new Date(record.createdAt).toLocaleDateString()}
+                          {new Date(record.borrow_date).toLocaleDateString()}
                         </span>
                       </div>
                     ))
@@ -128,31 +137,28 @@ function Home() {
                   Quick Actions
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <button className="p-4 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium">
-                    Add Book
-                  </button>
-                  <button className="p-4 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 transition-colors font-medium">
-                    Register Member
-                  </button>
-                  <button className="p-4 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 transition-colors font-medium">
-                    Issue Book
-                  </button>
-                  <button className="p-4 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 transition-colors font-medium">
-                    Return Book
-                  </button>
+                  <Link to="/books">
+                    <button className="p-4 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium">
+                      Add Book
+                    </button>
+                  </Link>
+                  <Link to="/members">
+                    <button className="p-4 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 transition-colors font-medium">
+                      Register Member
+                    </button>
+                  </Link>
+                  <Link to="/staff">
+                    <button className="p-4 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 transition-colors font-medium">
+                      Manage Staff
+                    </button>
+                  </Link>
+                  <Link to="/borrow-return">
+                    <button className="p-4 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 transition-colors font-medium">
+                      Return Book
+                    </button>
+                  </Link>
                 </div>
               </div>
-            </div>
-
-            {/* Extra content to force scroll */}
-            <div className="mt-8 bg-card p-6 rounded-xl shadow-sm border border-border">
-              <h3 className="text-lg font-semibold mb-4 text-foreground">
-                System Status
-              </h3>
-              <p className="text-muted-foreground">
-                System is running smoothly. Last backup was performed at 03:00
-                AM.
-              </p>
             </div>
           </main>
         </div>
@@ -163,12 +169,23 @@ function Home() {
     <div className="min-h-screen bg-background text-foreground py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl bg-linear-to-r from-orange-500 to-red-600 bg-clip-text text-transparent mb-4">
+        <div className="w-full flex items-center justify-between gap-4 border-b  w-full mb-2 p-2">
+          <h1 className="text-primary text-2xl font-bold">
             Library Management System
           </h1>
-          <p className="max-w-2xl mx-auto text-xl text-muted-foreground">
-            libray Management front end Ui made with the following latest
+          <nav className="flex justify-center gap-4">
+            <Link to="/login">
+              <button className="px-4 py-2 cursor-pointer border border-primary hover:bg-primary hover:text-background"> Login </button>
+            </Link>
+            <Link to="/register">
+              <button className="px-4 py-2 cursor-pointer border border-primary hover:bg-primary hover:text-background"> Register As a Staff </button>
+            </Link>
+          </nav>
+        </div>
+
+        <div className="text-center mb-16">
+          <p className="text-primary">
+            libray Management front end UI made with the following latest
             technologies.
           </p>
         </div>

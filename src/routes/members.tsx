@@ -4,18 +4,21 @@ import { TopNav } from "../components/TopNav";
 import { useAuth } from "../contexts/auth-context";
 import { API_URL } from "../config";
 import type { Member } from "../types";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Dialog } from "../components/dialog";
+import MemberCard from "../components/MemberCard";
+import { Search } from "lucide-react";
+import { useRouter } from "@tanstack/react-router";
+import { useToast } from "../contexts/toast-context";
 
 export const Route = createFileRoute("/members")({
   component: Members,
   loader: async (): Promise<{ members: Member[] }> => {
     const token = localStorage.getItem("token");
     if (!token) return { members: [] };
-
     try {
       const res = await fetch(`${API_URL}/members`, {
-        headers: { Authorization: `Bearer` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       const members = res.ok ? await res.json() : [];
       return { members };
@@ -31,25 +34,145 @@ export const Route = createFileRoute("/members")({
   ),
 });
 
+type MemberType = {
+  name: string,
+  email: string,
+  phone: string,
+  join_date: string,
+  state: 'idle' | 'loading' | 'error' | 'success',
+  error: string | null,
+  success: string | null
+}
 function Members() {
   const { isAuthenticated } = useAuth();
   const { members } = Route.useLoaderData();
+  const router = useRouter();
+  const { showToast } = useToast();
+  const [membersState, setMembersState] = useState<Member[]>(members ?? []);
+  const [openNewMemberDialog, setOpenNewMemberDialog] = useState(false);
+  const [newMember, setNewMember] = useState<MemberType>({ name: '', email: '', phone: '', join_date: '', error: '', success: '', state: 'idle' });
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const [openNew, setOpenNew] = useState(false);
+  const filteredMembers = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    return membersState.filter(m =>
+      m.name.toLowerCase().includes(q) ||
+      m.email.toLowerCase().includes(q)
+    );
+  }, [membersState, searchQuery]);
 
-  if (!isAuthenticated) {
-    return <div>Please login to view this page.</div>;
-  }
+  if (!isAuthenticated) return <div>Please login to view this page.</div>;
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <Dialog
-        onClose={() => {
-          setOpenNew(false);
-        }}
-        open={openNew}
+        onClose={() => setOpenNewMemberDialog(false)}
+        open={openNewMemberDialog}
       >
-        <h1> This is Dialog We need some </h1>
+        <h1 className="text-xl font-bold mb-4">Add New Member</h1>
+        <form>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1" htmlFor="name">
+              Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              className="w-full border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+              value={newMember.name}
+              onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1" htmlFor="email">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              className="w-full border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+              value={newMember.email}
+              onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1" htmlFor="phone">
+              Phone
+            </label>
+            <input
+              type="text"
+              id="phone"
+              className="w-full border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+              value={newMember.phone}
+              onChange={(e) => setNewMember({ ...newMember, phone: e.target.value })}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1" htmlFor="join_date">
+              Joining Date
+            </label>
+            <input
+              type="date"
+              id="join_date"
+              className="w-full border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+              value={newMember.join_date}
+              onChange={(e) => setNewMember({ ...newMember, join_date: e.target.value })}
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setOpenNewMemberDialog(false)}
+              className="px-4 py-2 border rounded-lg font-medium hover:bg-muted transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+              onClick={async () => {
+                try {
+                  if (newMember.name === '' || newMember.email === '' || newMember.phone === '' || newMember.join_date === '') {
+                    showToast("All fields are required", "error");
+                    return;
+                  }
+                  setNewMember({ ...newMember, state: 'loading' });
+                  const token = localStorage.getItem("token");
+                  const res = await fetch(`${API_URL}/members`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                      name: newMember.name,
+                      email: newMember.email,
+                      phone: newMember.phone,
+                      join_date: newMember.join_date
+                    })
+                  });
+                  if (res.ok) {
+                    const added = await res.json();
+                    setMembersState([...membersState, added]);
+                    setNewMember({ ...newMember, state: 'idle', name: '', email: '', phone: '', join_date: '' });
+                    setOpenNewMemberDialog(false);
+                    showToast("Member registered successfully!", "success");
+                    router.invalidate();
+                  } else {
+                    showToast("Failed to add member", "error");
+                    setNewMember({ ...newMember, state: 'idle' });
+                  }
+                } catch (err) {
+                  console.log(err);
+                  showToast("Failed to add member", "error");
+                  setNewMember({ ...newMember, state: 'idle' });
+                }
+              }}
+            >
+              {newMember.state === 'loading' ? 'Adding...' : 'Add Member'}
+            </button>
+          </div>
+        </form>
       </Dialog>
 
       <Sidebar />
@@ -57,71 +180,48 @@ function Members() {
         <TopNav />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-foreground">
-              Members Management
-            </h1>
-            <button className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors">
-              Register New Member
-            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">
+                Members Management
+              </h1>
+              <p className="text-muted-foreground">Manage and track library members</p>
+            </div>
+            <div className="flex gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search members..."
+                  className="pl-10 pr-4 py-2 border rounded-lg bg-card text-card-foreground focus:outline-none focus:ring-2 focus:ring-primary w-64"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <button onClick={() => setOpenNewMemberDialog(true)} className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+                + Register Member
+              </button>
+            </div>
           </div>
 
-          <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-muted/50 border-b border-border">
-                    <th className="px-6 py-4 text-sm font-semibold text-foreground">
-                      Name
-                    </th>
-                    <th className="px-6 py-4 text-sm font-semibold text-foreground">
-                      Email
-                    </th>
-                    <th className="px-6 py-4 text-sm font-semibold text-foreground">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {members.length > 0 ? (
-                    members.map((member) => (
-                      <tr
-                        key={member.email}
-                        className="hover:bg-muted/30 transition-colors"
-                      >
-                        <td className="px-6 py-4 text-sm text-foreground font-medium">
-                          {member.name}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-muted-foreground">
-                          {member.email}
-                        </td>
-                        <td className="px-6 py-4 text-sm">
-                          <div className="flex gap-3">
-                            <button className="text-primary hover:underline font-medium">
-                              Edit
-                            </button>
-                            <button className="text-destructive hover:underline font-medium">
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan={3}
-                        className="px-6 py-8 text-center text-muted-foreground"
-                      >
-                        No members found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredMembers.length > 0 ? (
+              filteredMembers.map((m) => (
+                <MemberCard
+                  key={m.id}
+                  memberSummary={m}
+                  onDelete={(id) => {
+                    setMembersState((s) => s.filter((x) => x.id !== id));
+                    router.invalidate();
+                  }}
+                />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-20 text-muted-foreground font-medium">No members found matching your search.</div>
+            )}
           </div>
         </main>
       </div>
     </div>
   );
 }
+

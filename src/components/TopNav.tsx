@@ -1,7 +1,10 @@
 import { useAuth } from "../contexts/auth-context";
+import { useTheme } from "../contexts/theme-context";
+import { Moon, Sun } from "lucide-react";
 
 export function TopNav() {
   const { user, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   return (
     <header className="bg-background shadow-sm z-10 border-b border-border">
@@ -35,6 +38,13 @@ export function TopNav() {
           </div>
           <div className="flex items-center">
             <div className="flex items-center gap-4">
+              <button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="p-2 rounded-full hover:bg-muted text-foreground transition-colors"
+                title="Toggle Theme"
+              >
+                {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
               <span className="text-sm text-muted-foreground">
                 Welcome,{" "}
                 <span className="font-semibold text-foreground">

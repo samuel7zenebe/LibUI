@@ -36,9 +36,9 @@ export function Login() {
       login(data.user || data, data.access_token || "dummy-token");
 
       setStatus("success");
-      setTimeout(() => {
-        navigate({ to: "/" });
-      }, 1000);
+
+      navigate({ to: "/" });
+
     } catch (err) {
       setStatus("error");
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -87,14 +87,6 @@ export function Login() {
                 >
                   Password
                 </label>
-                <div className="text-sm">
-                  <a
-                    href="#"
-                    className="font-medium text-primary hover:text-primary/80 transition-colors"
-                  >
-                    Forgot password?
-                  </a>
-                </div>
               </div>
               <input
                 id="password"

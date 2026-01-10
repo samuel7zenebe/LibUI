@@ -36,7 +36,7 @@ export function Dialog({
       onCancel={onClose} // ESC key
       onClose={onClose}
       onClick={handleClick}
-      className={`rounded-lg p-6 backdrop:bg-black/40 ${className}`}
+      className={`rounded-lg p-6 bg-background text-foreground border border-border backdrop:bg-black/50 min-w-lg mx-auto mt-20 shadow-lg ${className}`}
     >
       {children}
     </dialog>

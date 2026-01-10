@@ -9,17 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as StaffRouteImport } from './routes/staff'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as MembersRouteImport } from './routes/members'
 import { Route as MainRouteImport } from './routes/main'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as GenresRouteImport } from './routes/genres'
+import { Route as BorrowReturnRouteImport } from './routes/borrow-return'
 import { Route as BooksRouteImport } from './routes/books'
 import { Route as IndexRouteImport } from './routes/index'
 
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const StaffRoute = StaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -42,6 +50,16 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GenresRoute = GenresRouteImport.update({
+  id: '/genres',
+  path: '/genres',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BorrowReturnRoute = BorrowReturnRouteImport.update({
+  id: '/borrow-return',
+  path: '/borrow-return',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BooksRoute = BooksRouteImport.update({
   id: '/books',
   path: '/books',
@@ -56,78 +74,106 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/books': typeof BooksRoute
+  '/borrow-return': typeof BorrowReturnRoute
+  '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
   '/main': typeof MainRoute
   '/members': typeof MembersRoute
   '/register': typeof RegisterRoute
-  '/settings': typeof SettingsRoute
+  '/reports': typeof ReportsRoute
+  '/staff': typeof StaffRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/books': typeof BooksRoute
+  '/borrow-return': typeof BorrowReturnRoute
+  '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
   '/main': typeof MainRoute
   '/members': typeof MembersRoute
   '/register': typeof RegisterRoute
-  '/settings': typeof SettingsRoute
+  '/reports': typeof ReportsRoute
+  '/staff': typeof StaffRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/books': typeof BooksRoute
+  '/borrow-return': typeof BorrowReturnRoute
+  '/genres': typeof GenresRoute
   '/login': typeof LoginRoute
   '/main': typeof MainRoute
   '/members': typeof MembersRoute
   '/register': typeof RegisterRoute
-  '/settings': typeof SettingsRoute
+  '/reports': typeof ReportsRoute
+  '/staff': typeof StaffRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/books'
+    | '/borrow-return'
+    | '/genres'
     | '/login'
     | '/main'
     | '/members'
     | '/register'
-    | '/settings'
+    | '/reports'
+    | '/staff'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/books'
+    | '/borrow-return'
+    | '/genres'
     | '/login'
     | '/main'
     | '/members'
     | '/register'
-    | '/settings'
+    | '/reports'
+    | '/staff'
   id:
     | '__root__'
     | '/'
     | '/books'
+    | '/borrow-return'
+    | '/genres'
     | '/login'
     | '/main'
     | '/members'
     | '/register'
-    | '/settings'
+    | '/reports'
+    | '/staff'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BooksRoute: typeof BooksRoute
+  BorrowReturnRoute: typeof BorrowReturnRoute
+  GenresRoute: typeof GenresRoute
   LoginRoute: typeof LoginRoute
   MainRoute: typeof MainRoute
   MembersRoute: typeof MembersRoute
   RegisterRoute: typeof RegisterRoute
-  SettingsRoute: typeof SettingsRoute
+  ReportsRoute: typeof ReportsRoute
+  StaffRoute: typeof StaffRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
+    '/staff': {
+      id: '/staff'
+      path: '/staff'
+      fullPath: '/staff'
+      preLoaderRoute: typeof StaffRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -158,6 +204,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/genres': {
+      id: '/genres'
+      path: '/genres'
+      fullPath: '/genres'
+      preLoaderRoute: typeof GenresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/borrow-return': {
+      id: '/borrow-return'
+      path: '/borrow-return'
+      fullPath: '/borrow-return'
+      preLoaderRoute: typeof BorrowReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/books': {
       id: '/books'
       path: '/books'
@@ -178,11 +238,14 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BooksRoute: BooksRoute,
+  BorrowReturnRoute: BorrowReturnRoute,
+  GenresRoute: GenresRoute,
   LoginRoute: LoginRoute,
   MainRoute: MainRoute,
   MembersRoute: MembersRoute,
   RegisterRoute: RegisterRoute,
-  SettingsRoute: SettingsRoute,
+  ReportsRoute: ReportsRoute,
+  StaffRoute: StaffRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
