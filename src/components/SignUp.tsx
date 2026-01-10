@@ -115,6 +115,27 @@ export function SignUp() {
             </div>
             <div>
               <label
+                htmlFor="role"
+                className="block text-sm font-medium text-foreground"
+              >
+                Role
+              </label>
+              <select
+                id="role"
+                name="role"
+                required
+                value={formData.role}
+                onChange={(e) =>
+                  setFormData({ ...formData, role: e.target.value })
+                }
+                className="mt-1 block w-full px-4 py-3 bg-muted/50 border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              >
+                <option value="admin">Admin</option>
+                <option value="librarian">Librarian</option>
+              </select>
+            </div>
+            <div>
+              <label
                 htmlFor="password"
                 className="block text-sm font-medium text-foreground"
               >
