@@ -26,10 +26,6 @@ export const Route = createFileRoute("/borrow-return")({
             const books = booksRes.ok ? await booksRes.json() : [];
             const members = membersRes.ok ? await membersRes.json() : [];
 
-            console.log(" All Records : ", records);
-            console.log(" All Books : ", books);
-            console.log(" All Members : ", members);
-
             return { records, books, members };
         } catch (error) {
             console.error("Failed to fetch data", error);
@@ -47,6 +43,7 @@ function BorrowReturnPage() {
     const [openBorrowDialog, setOpenBorrowDialog] = useState(false);
     const [borrowForm, setBorrowForm] = useState({ book_id: "", member_id: "", due_date: "" });
     const [loading, setLoading] = useState(false);
+    const [returningId, setReturningId] = useState<string | null>(null);
 
     // Filter available books
     const availableBooks = useMemo(() => {
@@ -79,6 +76,7 @@ function BorrowReturnPage() {
     if (!isAuthenticated) return <div>Please login to view this page.</div>;
 
     const handleReturn = async (id: string) => {
+        setReturningId(id);
         try {
             const token = localStorage.getItem("token");
             const parsedId = Number.parseInt(id);
@@ -95,6 +93,8 @@ function BorrowReturnPage() {
         } catch (error) {
             console.error("Return failed", error);
             showToast("Failed to return book", "error");
+        } finally {
+            setReturningId(null);
         }
     };
 
@@ -220,9 +220,17 @@ function BorrowReturnPage() {
                                     {!record.return_date && (
                                         <button
                                             onClick={() => handleReturn(record.id.toString())}
-                                            className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-bold hover:bg-primary/90 transition-colors"
+                                            disabled={!!returningId}
+                                            className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
                                         >
-                                            Return Book
+                                            {returningId === record.id.toString() ? (
+                                                <>
+                                                    <Loader2 className="animate-spin" size={16} />
+                                                    Returning...
+                                                </>
+                                            ) : (
+                                                "Return Book"
+                                            )}
                                         </button>
                                     )}
                                     {record.return_date && (

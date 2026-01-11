@@ -9,6 +9,7 @@ import { useMemo, useState } from "react";
 import { Dialog } from "../components/dialog";
 import { useRouter } from "@tanstack/react-router";
 import { useToast } from "../contexts/toast-context";
+import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/books")({
   component: Books,
@@ -48,6 +49,7 @@ function Books() {
   const { showToast } = useToast();
   const [query, setQuery] = useState("");
   const [openAddBookDialog, setOpenAddBookDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [newBook, setNewBook] = useState({
     title: "",
     author: "",
@@ -70,6 +72,7 @@ function Books() {
   if (!isAuthenticated) return <div>Please login to view this page.</div>;
 
   const handleAddBook = async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`${API_URL}/books`, {
@@ -95,6 +98,8 @@ function Books() {
     } catch (error) {
       console.error("Add book failed", error);
       showToast("Failed to add book", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -138,7 +143,7 @@ function Books() {
             )}
           </div>
 
-          <Dialog open={openAddBookDialog} onClose={() => setOpenAddBookDialog(false)}>
+          <Dialog open={openAddBookDialog} onClose={() => !loading && setOpenAddBookDialog(false)}>
             <h2 className="text-xl font-bold mb-4">Add New Book</h2>
             <div className="space-y-4">
               <div>
@@ -148,6 +153,7 @@ function Books() {
                   placeholder="Book Title"
                   value={newBook.title}
                   onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
+                  disabled={loading}
                 />
               </div>
               <div>
@@ -157,6 +163,7 @@ function Books() {
                   placeholder="Author Name"
                   value={newBook.author}
                   onChange={(e) => setNewBook({ ...newBook, author: e.target.value })}
+                  disabled={loading}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -167,6 +174,7 @@ function Books() {
                     className="w-full border p-2 rounded bg-background"
                     value={newBook.published_year}
                     onChange={(e) => setNewBook({ ...newBook, published_year: parseInt(e.target.value) })}
+                    disabled={loading}
                   />
                 </div>
                 <div>
@@ -177,6 +185,7 @@ function Books() {
                     min="1"
                     value={newBook.available_copies}
                     onChange={(e) => setNewBook({ ...newBook, available_copies: parseInt(e.target.value) })}
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -186,6 +195,7 @@ function Books() {
                   className="w-full border p-2 rounded bg-background"
                   value={newBook.genre_id}
                   onChange={(e) => setNewBook({ ...newBook, genre_id: parseInt(e.target.value) })}
+                  disabled={loading}
                 >
                   <option value={0} disabled>Select a genre</option>
                   {genres.map((g: Genre) => (
@@ -197,17 +207,25 @@ function Books() {
               </div>
               <div className="flex justify-end gap-2 mt-6">
                 <button
-                  className="px-4 py-2 border rounded hover:bg-muted"
+                  className="px-4 py-2 border rounded hover:bg-muted disabled:opacity-50"
                   onClick={() => setOpenAddBookDialog(false)}
+                  disabled={loading}
                 >
                   Cancel
                 </button>
                 <button
-                  className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
+                  className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50"
                   onClick={handleAddBook}
-                  disabled={!newBook.title || !newBook.author || !newBook.genre_id}
+                  disabled={loading || !newBook.title || !newBook.author || !newBook.genre_id}
                 >
-                  Add Book
+                  {loading ? (
+                    <>
+                      <Loader2 className="animate-spin" size={16} />
+                      Adding...
+                    </>
+                  ) : (
+                    "Add Book"
+                  )}
                 </button>
               </div>
             </div>

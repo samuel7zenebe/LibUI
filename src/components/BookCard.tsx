@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dialog } from "./dialog";
 import type { Book, Genre } from "../types";
-import { Eye, Edit2, Trash2, X, Book as BookIcon } from "lucide-react";
+import { Eye, Edit2, Trash2, X, Book as BookIcon, Loader2 } from "lucide-react";
 import { API_URL } from "../config";
 import { useRouter } from "@tanstack/react-router";
 import { useToast } from "../contexts/toast-context";
@@ -17,6 +17,7 @@ export function BookCard({ book, genres }: Props) {
   const [openView, setOpenView] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [editForm, setEditForm] = useState({
     title: book.title,
@@ -27,6 +28,7 @@ export function BookCard({ book, genres }: Props) {
   });
 
   const handleEdit = async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`${API_URL}/books/${book.id}`, {
@@ -50,10 +52,13 @@ export function BookCard({ book, genres }: Props) {
     } catch (error) {
       console.error("Edit failed", error);
       showToast("Failed to update book", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`${API_URL}/books/${book.id}`, {
@@ -68,6 +73,8 @@ export function BookCard({ book, genres }: Props) {
     } catch (error) {
       console.error("Delete failed", error);
       showToast("Failed to delete book", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -109,7 +116,7 @@ export function BookCard({ book, genres }: Props) {
         </div>
       </Dialog>
 
-      <Dialog open={openEdit} onClose={() => setOpenEdit(false)}>
+      <Dialog open={openEdit} onClose={() => !loading && setOpenEdit(false)}>
         <h2 className="text-xl font-bold mb-4">Edit Book</h2>
         <div className="space-y-4">
           <div>
@@ -118,6 +125,7 @@ export function BookCard({ book, genres }: Props) {
               className="w-full border p-2 rounded bg-background"
               value={editForm.title}
               onChange={e => setEditForm({ ...editForm, title: e.target.value })}
+              disabled={loading}
             />
           </div>
           <div>
@@ -126,6 +134,7 @@ export function BookCard({ book, genres }: Props) {
               className="w-full border p-2 rounded bg-background"
               value={editForm.author}
               onChange={e => setEditForm({ ...editForm, author: e.target.value })}
+              disabled={loading}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -136,6 +145,7 @@ export function BookCard({ book, genres }: Props) {
                 className="w-full border p-2 rounded bg-background"
                 value={editForm.published_year}
                 onChange={e => setEditForm({ ...editForm, published_year: parseInt(e.target.value) })}
+                disabled={loading}
               />
             </div>
             <div>
@@ -145,6 +155,7 @@ export function BookCard({ book, genres }: Props) {
                 className="w-full border p-2 rounded bg-background"
                 value={editForm.available_copies}
                 onChange={e => setEditForm({ ...editForm, available_copies: parseInt(e.target.value) })}
+                disabled={loading}
               />
             </div>
           </div>
@@ -154,6 +165,7 @@ export function BookCard({ book, genres }: Props) {
               className="w-full border p-2 rounded bg-background"
               value={editForm.genre_id}
               onChange={e => setEditForm({ ...editForm, genre_id: parseInt(e.target.value) })}
+              disabled={loading}
             >
               {genres.map(g => (
                 <option key={g.id} value={g.id}>{g.name}</option>
@@ -161,18 +173,36 @@ export function BookCard({ book, genres }: Props) {
             </select>
           </div>
           <div className="flex justify-end gap-2 mt-6">
-            <button onClick={() => setOpenEdit(false)} className="px-4 py-2 border rounded hover:bg-muted">Cancel</button>
-            <button onClick={handleEdit} className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors">Save Changes</button>
+            <button onClick={() => setOpenEdit(false)} className="px-4 py-2 border rounded hover:bg-muted disabled:opacity-50" disabled={loading}>Cancel</button>
+            <button onClick={handleEdit} className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin" size={16} />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </button>
           </div>
         </div>
       </Dialog>
 
-      <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
+      <Dialog open={openDelete} onClose={() => !loading && setOpenDelete(false)}>
         <h2 className="text-xl font-bold mb-4">Confirm Delete</h2>
         <p className="text-muted-foreground">Are you sure you want to delete <span className="font-bold text-foreground">"{book.title}"</span>? This action cannot be undone.</p>
         <div className="flex justify-end gap-2 mt-6">
-          <button onClick={() => setOpenDelete(false)} className="px-4 py-2 border rounded hover:bg-muted">Cancel</button>
-          <button onClick={handleDelete} className="px-4 py-2 bg-destructive text-white rounded hover:bg-destructive/90 transition-colors">Delete Book</button>
+          <button onClick={() => setOpenDelete(false)} className="px-4 py-2 border rounded hover:bg-muted disabled:opacity-50" disabled={loading}>Cancel</button>
+          <button onClick={handleDelete} className="px-4 py-2 bg-destructive text-white rounded hover:bg-destructive/90 transition-colors flex items-center gap-2 disabled:opacity-50" disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="animate-spin" size={16} />
+                Deleting...
+              </>
+            ) : (
+              "Delete Book"
+            )}
+          </button>
         </div>
       </Dialog>
     </div>
