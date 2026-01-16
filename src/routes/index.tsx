@@ -3,8 +3,6 @@ import { useAuth } from "../contexts/auth-context";
 import { Sidebar } from "../components/Sidebar";
 import { TopNav } from "../components/TopNav";
 import { API_URL } from "../config";
-
-
 import type { Book, Member, BorrowRecord } from "../types";
 
 export const Route = createFileRoute("/")({
@@ -55,7 +53,8 @@ function Home() {
 
   if (isAuthenticated) {
     const overdueBooks = borrowRecords.filter(
-      (record: BorrowRecord) => !record.return_date && new Date(record.due_date) < new Date()
+      (record: BorrowRecord) =>
+        !record.return_date && new Date(record.due_date) < new Date()
     ).length;
 
     return (
@@ -90,7 +89,11 @@ function Home() {
                   Active Borrows
                 </h3>
                 <p className="text-3xl font-bold text-primary">
-                  {borrowRecords.filter((record: BorrowRecord) => !record.return_date).length}
+                  {
+                    borrowRecords.filter(
+                      (record: BorrowRecord) => !record.return_date
+                    ).length
+                  }
                 </p>
               </div>
               <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
@@ -116,7 +119,8 @@ function Home() {
                       >
                         <div className="w-2 h-2 rounded-full bg-primary"></div>
                         <p className="text-sm text-foreground">
-                          {record.member?.name || "Member"} {record.return_date ? 'returned' : 'borrowed'}{" "}
+                          {record.member?.name || "Member"}{" "}
+                          {record.return_date ? "returned" : "borrowed"}{" "}
                           {record.book?.title || "Book"}
                         </p>
                         <span className="ml-auto text-xs text-muted-foreground">
@@ -169,16 +173,22 @@ function Home() {
     <div className="min-h-screen bg-background text-foreground py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="w-full flex items-center justify-between gap-4 border-b  w-full mb-2 p-2">
+        <div className="flex items-center justify-between gap-4 border-b  w-full mb-2 p-2">
           <h1 className="text-primary text-2xl font-bold">
             Library Management System
           </h1>
           <nav className="flex justify-center gap-4">
             <Link to="/login">
-              <button className="px-4 py-2 cursor-pointer border border-primary hover:bg-primary hover:text-background"> Login </button>
+              <button className="px-4 py-2 cursor-pointer border border-primary hover:bg-primary hover:text-background">
+                {" "}
+                Login{" "}
+              </button>
             </Link>
             <Link to="/register">
-              <button className="px-4 py-2 cursor-pointer border border-primary hover:bg-primary hover:text-background"> Register As a Staff </button>
+              <button className="px-4 py-2 cursor-pointer border border-primary hover:bg-primary hover:text-background">
+                {" "}
+                Register As a Staff{" "}
+              </button>
             </Link>
           </nav>
         </div>
